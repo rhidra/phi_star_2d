@@ -82,9 +82,9 @@ def phi_star(start, goal, grid, obs, openset=set(), closedset=set()):
                 node.lb = - float('inf')
                 openset.add(node)
             
-            updateVertex(current, node, grid, obs)
+            showPath2 = updateVertex(current, node, grid, obs)
 
-        if i % 1 == 0:
+        if i % 10 == 0:
             plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node)
 
     if not goal.parent:
@@ -124,16 +124,15 @@ def clearSubtree(node, grid, obs, openset, closedset):
                 if node.G < g_old:
                     openset.add(node)
 
-                
 
 def main(obs_threshold=.2):
-    width, height = 20, 20
+    width, height = 30, 30
     start = (0, 0)
     goal = (width-1, height-1)
 
     x, y = np.mgrid[0:width, 0:height]
     x_obs, y_obs = np.mgrid[0:width-1, 0:height-1]
-    grid_obs = np.vectorize(pnoise2)(x_obs / 6+100, y_obs / 6+100)
+    grid_obs = np.vectorize(pnoise2)(x_obs / 6, y_obs / 6)
     grid_obs[grid_obs > obs_threshold] = Node.OBSTACLE
     grid_obs[grid_obs <= obs_threshold] = Node.FREE
     grid_obs[start], grid_obs[goal[0]-1, goal[1]-1] = Node.FREE, Node.FREE

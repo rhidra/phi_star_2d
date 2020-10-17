@@ -21,7 +21,7 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
             node = node.local
         pt_list.append([node.pos[0], node.pos[1]])
         lines.append(pt_list)
-    ax.add_collection(collections.LineCollection(lines, colors='green'))
+    ax.add_collection(collections.LineCollection(lines, colors='green', alpha=1 if len(path) == 0 else .5))
 
     lines = []
     for node in nodes:
@@ -31,7 +31,7 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
             node = node.parent
         pt_list.append([node.pos[0], node.pos[1]])
         lines.append(pt_list)
-    ax.add_collection(collections.LineCollection(lines, colors='red'))
+    ax.add_collection(collections.LineCollection(lines, colors='red', alpha=1 if len(path) == 0 else .5))
 
     if start:
         ax.add_patch(patches.Circle(start.pos, .3, linewidth=1, facecolor='green'))
@@ -68,15 +68,15 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
         local.append(node.pos)
         local = np.array(local)
         path_ = np.array([p.pos for p in path])
-        plt.plot(path_[:, 0], path_[:, 1], color='red')
-        plt.plot(local[:, 0], local[:, 1], color='green')
+        plt.plot(local[:, 0], local[:, 1], color='green', linewidth=3)
+        plt.plot(path_[:, 0], path_[:, 1], color='red', linewidth=4)
 
         pts = []
         node = path[-1]
         while node.parent:
             pts += supercover(node, node.parent)
             node = node.parent
-        ax.add_collection(collections.PatchCollection([patches.Rectangle([p[0], p[1]], 1, 1, linewidth=1, facecolor='purple') for p in pts], match_original=True))
+        ax.add_collection(collections.PatchCollection([patches.Rectangle([p[0], p[1]], 1, 1, linewidth=1, facecolor='orange', alpha=.5) for p in pts], match_original=True))
 
     plt.title('Processing...')
     if hold:
@@ -84,7 +84,6 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
     else:
         plt.pause(.01)
     
-
 
 def waitForInput(obs, plotCb):
     refreshDisplay = False
@@ -95,7 +94,7 @@ def waitForInput(obs, plotCb):
         nonlocal refreshDisplay
         refreshDisplay = True
         x, y = int(event.xdata), int(event.ydata)
-        obs[x, y] = Node.OBSTACLE
+        obs[x, y] = Node.OBSTACLE if obs[x, y] == Node.FREE else Node.FREE
         blockedCells.append((x, y))
 
     def onkey(event):
