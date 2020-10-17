@@ -18,12 +18,16 @@ class Node:
 
     def __init__(self, x, y):
         self.pos = [x, y]
+        self.reset()
+
+    def reset(self):
         self.parent = None
         self.local = None
         self.H = 0
-        self.G = 0
+        self.G = math.inf
         self.lb = -math.inf
         self.ub = math.inf
+
 
     def __repr__(self):
         return 'Node: ' + self.pos.__repr__()
@@ -34,6 +38,17 @@ def phi(a,b,c):
     if angle > 180:
         angle = - (180 - (angle % 180)) # Set angle between [-180; 180]
     return angle
+
+
+# Return the list of corner coordinates for all block cells
+def corners(cells):
+    pts = set()
+    for x, y in cells:
+        pts.add((x, y))
+        pts.add((x + 1, y))
+        pts.add((x + 1, y + 1))
+        pts.add((x, y + 1))
+    return pts
 
 # Improved Bresenham algorithm to retrieve the entire super cover of the line
 def supercover(a, b):
@@ -132,7 +147,6 @@ def lineOfSightNeighbors(a, b, obs):
             return obs[xobs, ya] == Node.FREE or obs[xobs, ya - 1] == Node.FREE
     except IndexError:
         return True
-
 
 
 # Bresenham (1950) fast line of sight algorithm for computer graphics

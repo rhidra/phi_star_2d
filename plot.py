@@ -78,9 +78,42 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
             node = node.parent
         ax.add_collection(collections.PatchCollection([patches.Rectangle([p[0], p[1]], 1, 1, linewidth=1, facecolor='purple') for p in pts], match_original=True))
 
-
+    plt.title('Processing...')
     if hold:
         plt.show()
     else:
         plt.pause(.01)
     
+
+
+def waitForInput(obs, plotCb):
+    refreshDisplay = False
+    inputPending = True
+    blockedCells = []
+
+    def onclick(event):
+        nonlocal refreshDisplay
+        refreshDisplay = True
+        x, y = int(event.xdata), int(event.ydata)
+        obs[x, y] = Node.OBSTACLE
+        blockedCells.append((x, y))
+
+    def onkey(event):
+        nonlocal refreshDisplay, inputPending
+        if event.key == 'enter':
+            refreshDisplay = True
+            inputPending = False
+
+    cid1 = fig.canvas.mpl_connect('button_press_event', onclick)
+    cid2 = fig.canvas.mpl_connect('key_press_event', onkey)
+
+    while inputPending:
+        plt.title('Waiting for input... Press Enter to confirm')
+        while not refreshDisplay:
+            plt.pause(.001)
+        refreshDisplay = False
+        plotCb()
+    
+    fig.canvas.mpl_disconnect(cid1)
+    fig.canvas.mpl_disconnect(cid2)
+    return blockedCells
