@@ -85,7 +85,7 @@ def phi_star(start, goal, grid, obs, openset=set(), closedset=set()):
             showPath2 = updateVertex(current, node, grid, obs)
 
         if i % 10 == 0:
-            plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node)
+            plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node, showPath2=showPath2)
 
     if not goal.parent:
         raise ValueError('No Path Found')

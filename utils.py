@@ -83,7 +83,7 @@ def supercover(a, b):
         error = dx
         errorprev = dx
 
-        for i in range(dx):
+        for _ in range(dx):
             x += xstep
             error += ddy
             if error > ddx:
@@ -101,7 +101,7 @@ def supercover(a, b):
     else:
         errorprev = dy
         error = dy
-        for i in range(dy):
+        for _ in range(dy):
             y += ystep
             error += ddx
             if error > ddy:
