@@ -144,18 +144,14 @@ def main(obs_threshold=.2):
     openset = set()
     closedset = set()
 
-    print('Start the simulation')
     while True:
         path = phi_star(start, goal, grid, grid_obs, openset, closedset)
         plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
         blockedCells = plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
 
-        print('Cells blocked !')
         for pt in corners(blockedCells):
             if (grid[pt] in openset or grid[pt] in closedset) and grid[pt] != start:
                 clearSubtree(grid[pt], grid, grid_obs, openset, closedset)
-        
-
 
 
 if __name__ == '__main__':
