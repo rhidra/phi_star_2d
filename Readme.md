@@ -22,5 +22,17 @@ To configure the setup of the simulation, you can edit the `config.py` file.
 
 Theta*: [Daniel, Nash, "Theta star, Any-angle path planning on grids"](https://www.jair.org/index.php/jair/article/download/10676/25515/)
 
-### Time commparison
+### Time comparison
 
+| # | Size         | Obstacle size | Offset | Theta*  | Theta* - Replanning (end) | Phi*   | Phi* - Replanning (mid) | Phi* - Replanning (end) |
+|---|--------------|---------------|--------|---------|---------------------------|--------|-------------------------|-------------------------|
+| 1 | (100, 100)   | 6             | 0      | 0.04888 | 0.05731                   | 0.7533 | 0.03627                 | 0.03152                 |
+| 2 | (500, 500)   | 6             | 0      | 0.5551  | 0.5386                    | 0.7062 | 0.5521                  | 0.3449                  |
+| 3 | (1000, 1000) | 20            | 0      | 2.578   |                           | 2.797  |                         |                         |
+| 4 | (5000, 5000) | 20            | 0      | 142.50  |                           | 210.18 |                         |                         |
+
+### Length comparison
+
+| # | Size     | Obstacle size | Offset | Theta* | Phi*  |
+|---|----------|---------------|--------|--------|-------|
+| 1 | (30, 30) | 6             | 0      | 42.71  | 44.01 |
