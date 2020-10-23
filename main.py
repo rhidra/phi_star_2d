@@ -84,7 +84,7 @@ def phi_star(start, goal, grid, obs, openset=set(), closedset=set()):
             
             showPath2 = updateVertex(current, node, grid, obs)
 
-        if i % 10 == 0:
+        if i % 1 == 0 and False:
             plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node, showPath2=showPath2)
 
     if not goal.parent:
@@ -144,7 +144,10 @@ def main(obs_threshold=.2):
     closedset = set()
 
     while True:
+        t1 = time.time()
         path = phi_star(start, goal, grid, grid_obs, openset, closedset)
+        duration = abs(time.time() - t1)
+        print('Computation time:', duration)
         plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
         blockedCells = plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
 
