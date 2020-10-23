@@ -2,7 +2,7 @@ import numpy as np, math, sys, time, matplotlib.pyplot as plt
 import plot
 from noise import pnoise2
 from functools import reduce
-from utils import dist, Node, lineOfSight, phi, lineOfSightNeighbors, corners
+from utils import dist, Node, lineOfSight, phi, lineOfSightNeighbors, corners, pathLength
 from collections import deque
 from config import *
 
@@ -146,9 +146,16 @@ def main():
     while True:
         t1 = time.time()
         path = phi_star(start, goal, grid, grid_obs, openset, closedset)
+        
         if not DISPLAY:
             duration = abs(time.time() - t1)
             print('Computation time:', duration)
+
+        print('Path length:', pathLength(path))
+
+        if not DISPLAY_DONE:
+            break
+
         plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
         blockedCells = plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
 

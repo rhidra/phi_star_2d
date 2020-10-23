@@ -195,3 +195,11 @@ def lineOfSight_(a, b, grid):
             y0 = y0 + sy
     return True
 
+
+def pathLength(path):
+    l, prev = 0, None
+    for pt in path:
+        if prev is not None:
+            l += dist(prev, pt)
+        prev = pt
+    return l
