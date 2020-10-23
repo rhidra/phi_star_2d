@@ -1,5 +1,6 @@
 import numpy as np, matplotlib.pyplot as plt, matplotlib.patches as patches, matplotlib.collections as collections
 from utils import supercover, Node, lineOfSightNeighbors, lineOfSight, dist, phi
+from config import DISPLAY_DELAY
 
 fig, ax = plt.subplots()
 
@@ -82,7 +83,7 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
     if hold:
         plt.show()
     else:
-        plt.pause(.01)
+        plt.pause(DISPLAY_DELAY)
     
 
 def waitForInput(obs, plotCb):

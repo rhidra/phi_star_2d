@@ -4,6 +4,7 @@ from noise import pnoise2
 from functools import reduce
 from utils import dist, Node, lineOfSight, phi, lineOfSightNeighbors, corners
 from collections import deque
+from config import *
 
 
 # Return all the children (neighbors) of a specific node
@@ -84,7 +85,7 @@ def phi_star(start, goal, grid, obs, openset=set(), closedset=set()):
             
             showPath2 = updateVertex(current, node, grid, obs)
 
-        if i % 1 == 0 and False:
+        if i % 1 == 0 and DISPLAY:
             plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node, showPath2=showPath2)
 
     if not goal.parent:
@@ -125,16 +126,15 @@ def clearSubtree(node, grid, obs, openset, closedset):
                     openset.add(node)
 
 
-def main(obs_threshold=.2):
-    width, height = 30, 30
+def main():
     start = (0, 0)
-    goal = (width-1, height-1)
+    goal = (WIDTH-1, HEIGHT-1)
 
-    x, y = np.mgrid[0:width, 0:height]
-    x_obs, y_obs = np.mgrid[0:width-1, 0:height-1]
-    grid_obs = np.vectorize(pnoise2)(x_obs / 6, y_obs / 6)
-    grid_obs[grid_obs > obs_threshold] = Node.OBSTACLE
-    grid_obs[grid_obs <= obs_threshold] = Node.FREE
+    x, y = np.mgrid[0:WIDTH, 0:HEIGHT]
+    x_obs, y_obs = np.mgrid[0:WIDTH-1, 0:HEIGHT-1]
+    grid_obs = np.vectorize(pnoise2)(x_obs / OBSTACLE_X_SIZE, y_obs / OBSTACLE_Y_SIZE)
+    grid_obs[grid_obs > OBSTACLE_THRESHOLD] = Node.OBSTACLE
+    grid_obs[grid_obs <= OBSTACLE_THRESHOLD] = Node.FREE
     grid_obs[start], grid_obs[goal[0]-1, goal[1]-1] = Node.FREE, Node.FREE
     grid = np.vectorize(Node)(x, y)
     start, goal = grid[start], grid[goal]
@@ -146,8 +146,9 @@ def main(obs_threshold=.2):
     while True:
         t1 = time.time()
         path = phi_star(start, goal, grid, grid_obs, openset, closedset)
-        duration = abs(time.time() - t1)
-        print('Computation time:', duration)
+        if not DISPLAY:
+            duration = abs(time.time() - t1)
+            print('Computation time:', duration)
         plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
         blockedCells = plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
 
