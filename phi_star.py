@@ -57,7 +57,7 @@ def updateVertex(current, node, grid, obs):
     return showPath2
 
 # Return the path computed by the A* optimized algorithm from the start and goal points
-def phi_star(start, goal, grid, obs, openset=set(), closedset=set()):
+def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
     if len(openset) == 0:
         openset.add(start)
 
@@ -126,16 +126,8 @@ def clearSubtree(node, grid, obs, openset, closedset):
                     openset.add(node)
 
 
-def main():
-    start = (0, 0)
-    goal = (WIDTH-1, HEIGHT-1)
-
-    x, y = np.mgrid[0:WIDTH, 0:HEIGHT]
-    x_obs, y_obs = np.mgrid[0:WIDTH-1, 0:HEIGHT-1]
-    grid_obs = np.vectorize(pnoise2)(x_obs / OBSTACLE_X_SIZE, y_obs / OBSTACLE_Y_SIZE)
-    grid_obs[grid_obs > OBSTACLE_THRESHOLD] = Node.OBSTACLE
-    grid_obs[grid_obs <= OBSTACLE_THRESHOLD] = Node.FREE
-    grid_obs[start], grid_obs[goal[0]-1, goal[1]-1] = Node.FREE, Node.FREE
+def phi_star(start, goal, grid_obs):
+    x, y = np.mgrid[0:grid_obs.shape[0]+1, 0:grid_obs.shape[1]+1]
     grid = np.vectorize(Node)(x, y)
     start, goal = grid[start], grid[goal]
     goal.H, start.G, start.H = 0, 0, dist(start, goal)
@@ -145,7 +137,7 @@ def main():
 
     while True:
         t1 = time.time()
-        path = phi_star(start, goal, grid, grid_obs, openset, closedset)
+        path = find_path(start, goal, grid, grid_obs, openset, closedset)
         
         if not DISPLAY:
             duration = abs(time.time() - t1)
@@ -162,6 +154,19 @@ def main():
         for pt in corners(blockedCells):
             if (grid[pt] in openset or grid[pt] in closedset) and grid[pt] != start:
                 clearSubtree(grid[pt], grid, grid_obs, openset, closedset)
+
+                
+def main():
+    start = (0, 0)
+    goal = (WIDTH-1, HEIGHT-1)
+
+    x_obs, y_obs = np.mgrid[0:WIDTH-1, 0:HEIGHT-1]
+    grid_obs = np.vectorize(pnoise2)(x_obs / OBSTACLE_X_SIZE, y_obs / OBSTACLE_Y_SIZE)
+    grid_obs[grid_obs > OBSTACLE_THRESHOLD] = Node.OBSTACLE
+    grid_obs[grid_obs <= OBSTACLE_THRESHOLD] = Node.FREE
+    grid_obs[start], grid_obs[goal[0]-1, goal[1]-1] = Node.FREE, Node.FREE
+    
+    phi_star(start, goal, grid_obs)
 
 
 if __name__ == '__main__':

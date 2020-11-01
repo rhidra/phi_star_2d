@@ -43,7 +43,7 @@ def updateVertex(current, node, grid, obs):
             node.local = current
 
 # Return the path computed by the A* optimized algorithm from the start and goal points
-def theta_star(start, goal, grid, obs, openset=set(), closedset=set()):
+def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
     if len(openset) == 0:
         openset.add(start)
 
@@ -84,16 +84,8 @@ def theta_star(start, goal, grid, obs, openset=set(), closedset=set()):
     return path[::-1]
 
 
-def main():
-    start = (0, 0)
-    goal = (WIDTH-1, HEIGHT-1)
-
-    x, y = np.mgrid[0:WIDTH, 0:HEIGHT]
-    x_obs, y_obs = np.mgrid[0:WIDTH-1, 0:HEIGHT-1]
-    grid_obs = np.vectorize(pnoise2)((x_obs - OBSTACLE_X_OFFSET) / OBSTACLE_X_SIZE, (y_obs - OBSTACLE_Y_OFFSET) / OBSTACLE_Y_SIZE)
-    grid_obs[grid_obs > OBSTACLE_THRESHOLD] = Node.OBSTACLE
-    grid_obs[grid_obs <= OBSTACLE_THRESHOLD] = Node.FREE
-    grid_obs[start], grid_obs[goal[0]-1, goal[1]-1] = Node.FREE, Node.FREE
+def theta_star(start, goal, grid_obs):
+    x, y = np.mgrid[0:grid_obs.shape[0]+1, 0:grid_obs.shape[1]+1]
     grid = np.vectorize(Node)(x, y)
     start, goal = grid[start], grid[goal]
     goal.H, start.G, start.H = 0, 0, dist(start, goal)
@@ -103,7 +95,7 @@ def main():
 
     while True:
         t1 = time.time()
-        path = theta_star(start, goal, grid, grid_obs, openset, closedset)
+        path = find_path(start, goal, grid, grid_obs, openset, closedset)
         
         if not DISPLAY:
             duration = abs(time.time() - t1)
@@ -119,6 +111,19 @@ def main():
         openset = set()
         closedset = set()
         goal.reset()
+
+
+def main():
+    start = (0, 0)
+    goal = (WIDTH-1, HEIGHT-1)
+
+    x_obs, y_obs = np.mgrid[0:WIDTH-1, 0:HEIGHT-1]
+    grid_obs = np.vectorize(pnoise2)((x_obs - OBSTACLE_X_OFFSET) / OBSTACLE_X_SIZE, (y_obs - OBSTACLE_Y_OFFSET) / OBSTACLE_Y_SIZE)
+    grid_obs[grid_obs > OBSTACLE_THRESHOLD] = Node.OBSTACLE
+    grid_obs[grid_obs <= OBSTACLE_THRESHOLD] = Node.FREE
+    grid_obs[start], grid_obs[goal[0]-1, goal[1]-1] = Node.FREE, Node.FREE
+
+    theta_star(start, goal, grid_obs)
 
 
 if __name__ == '__main__':
