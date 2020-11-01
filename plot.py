@@ -51,7 +51,7 @@ def display(start=None, goal=None, grid=[], grid_obs=[], path=[], nodes=[], poin
     if point and point2 and lineOfSightNeighbors(point.pos, point2.pos, grid_obs):
         ax.add_patch(patches.Arrow(point.pos[0], point.pos[1], point2.pos[0]-point.pos[0], point2.pos[1]-point.pos[1], .4, facecolor='red'))
     
-    if point and point2 and point.parent and lineOfSight(point.parent, point2, grid, grid_obs) and showPath2:
+    if point and point2 and point.parent and lineOfSight(point.parent, point2, grid_obs) and showPath2:
         ax.add_patch(patches.Arrow(point.parent.pos[0], point.parent.pos[1], point2.pos[0]-point.parent.pos[0], point2.pos[1]-point.parent.pos[1], .3, facecolor='magenta'))
     
     if point and point2 and point.parent:

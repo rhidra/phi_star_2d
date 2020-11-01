@@ -7,7 +7,7 @@ import numpy as np, math, sys, time, matplotlib.pyplot as plt
 import plot
 from noise import pnoise2
 from functools import reduce
-from utils import dist, Node, lineOfSight, phi, lineOfSightNeighbors, corners, pathLength
+from utils import dist, Node, lineOfSight, phi, lineOfSightNeighbors, corners, pathLength, updateGridBlockedCells, NoPathFound
 from collections import deque
 from config import *
 
@@ -26,7 +26,7 @@ def children(node, grid, obs, crossbar=True, checkLOS=True):
     
 
 def updateVertex(current, node, grid, obs):
-    if current.parent and lineOfSight(current.parent, node, grid, obs):
+    if current.parent and lineOfSight(current.parent, node, obs):
         # Path 2
         # If in line of sight, we connect to the parent, it avoid unecessary grid turns
         new_g = current.parent.G + dist(current.parent, node)
@@ -73,7 +73,7 @@ def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
             plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node, showPath2=False)
 
     if not goal.parent:
-        raise ValueError('No Path Found')
+        raise NoPathFound
     
     path = []
     current = goal
@@ -84,24 +84,39 @@ def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
     return path[::-1]
 
 
-def theta_star(start, goal, grid_obs):
+def pathBlocked(grid_obs, path):
+    prev = None
+    for node in path:
+        if prev is not None and not lineOfSight(prev, node, grid_obs):
+            return True
+        prev = node
+    return False
+
+
+def theta_star(start, goal, grid_obs, newBlockedCells=[]):
+    durations = []
+    lengths = []
+    paths = []
+
     x, y = np.mgrid[0:grid_obs.shape[0]+1, 0:grid_obs.shape[1]+1]
     grid = np.vectorize(Node)(x, y)
     start, goal = grid[start], grid[goal]
     goal.H, start.G, start.H = 0, 0, dist(start, goal)
 
+    newBlockedCells = iter(newBlockedCells)
     openset = set()
     closedset = set()
 
+    t1 = time.time()
+
     while True:
-        t1 = time.time()
         path = find_path(start, goal, grid, grid_obs, openset, closedset)
         
         if not DISPLAY:
             duration = abs(time.time() - t1)
-            print('Computation time:', duration)
-        
-        print('Path length:', pathLength(path))
+            durations.append(duration)
+        lengths.append(pathLength(path))
+        paths.append(list(map(lambda n: n.pos, path)))
 
         if not REPLANNING:
             break
@@ -109,10 +124,20 @@ def theta_star(start, goal, grid_obs):
         if DISPLAY and WAIT_INPUT:
             plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
             plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
+        else:
+            try:
+                blockedCells = next(newBlockedCells)
+                updateGridBlockedCells(blockedCells, grid_obs)
+            except StopIteration:
+                break
+
+        t1 = time.time()
+
+        if pathBlocked(grid_obs, path):
             openset = set()
             closedset = set()
             goal.reset()
-    return path, openset.union(closedset)
+    return path, openset.union(closedset), durations, lengths, paths
 
 
 def main():

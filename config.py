@@ -11,10 +11,18 @@ OBSTACLE_X_OFFSET = 0
 OBSTACLE_Y_OFFSET = 0
 
 # Real time display of the algorithm
-DISPLAY = True
+DISPLAY = False
 DISPLAY_DELAY = .001
 DISPLAY_FREQ = 5
-WAIT_INPUT = DISPLAY and True
+DISPLAY_END = False # Should display for a few seconds at the end of the algorithm (before auto replanning)
+WAIT_INPUT = DISPLAY_END and False
 
 # Allow replanning, through user input or programmatically
-REPLANNING = False
+REPLANNING = True
+
+# For automatic blocked cell generation
+BLOCKED_CELLS = 20 # Number of newly blocked cell in one loop 
+BLOCKED_CELLS_LOOP = 5 # Number of loops of replanning 
+
+# For the algorithm time duration, average on how many samples
+ALGO_DURATION_AVERAGE = 10

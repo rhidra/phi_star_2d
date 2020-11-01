@@ -56,13 +56,17 @@ def readTraj(id):
 
 
 def mapGenerator():
+    mapid = -1
     for id in getIdList():
+        mapid += 1
         grid = readMap(id)
         trajs = readTraj(id)
+        trajid = -1
         for traj in trajs:
+            trajid += 1
             x, y = traj['x'], traj['y']
             start, goal = (int(x[0]), int(y[0])), (int(x[-1]), int(y[-1]))
             # start, goal = ((x[0]), (y[0])), ((x[-1]), (y[-1]))
             grid[start], grid[goal] = Node.FREE, Node.FREE
-            yield start, goal, grid
+            yield (mapid, trajid), start, goal, grid
 

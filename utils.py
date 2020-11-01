@@ -32,6 +32,8 @@ class Node:
     def __repr__(self):
         return 'Node: ' + self.pos.__repr__()
 
+class NoPathFound(Exception):
+    pass
 
 def phi(a,b,c):
     a, b, c = getPos(a), getPos(b), getPos(c)
@@ -50,6 +52,10 @@ def corners(cells):
         pts.add((x + 1, y + 1))
         pts.add((x, y + 1))
     return pts
+
+def updateGridBlockedCells(blockedCells, grid):
+    for x, y in blockedCells:
+        grid[x, y] = Node.OBSTACLE if grid[x, y] == Node.FREE else Node.FREE
 
 # Improved Bresenham algorithm to retrieve the entire super cover of the line
 def supercover(a, b):
@@ -120,7 +126,7 @@ def supercover(a, b):
     return pts
 
 
-def lineOfSight(a, b, grid, obs):
+def lineOfSight(a, b, obs):
     for pt in supercover(a, b):
         try:
             if obs[pt[0], pt[1]] == Node.OBSTACLE:

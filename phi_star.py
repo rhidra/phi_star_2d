@@ -2,7 +2,7 @@ import numpy as np, math, sys, time, matplotlib.pyplot as plt
 import plot
 from noise import pnoise2
 from functools import reduce
-from utils import dist, Node, lineOfSight, phi, lineOfSightNeighbors, corners, pathLength
+from utils import dist, Node, lineOfSight, phi, lineOfSightNeighbors, corners, pathLength, updateGridBlockedCells, NoPathFound
 from collections import deque
 from config import *
 
@@ -26,7 +26,7 @@ def pathTie(node, current):
     
 
 def updateVertex(current, node, grid, obs):
-    if current.parent and lineOfSight(current.parent, node, grid, obs) \
+    if current.parent and lineOfSight(current.parent, node, obs) \
                     and current.lb <= phi(current, current.parent, node) <= current.ub \
                     and not pathTie(node, current):
         # Path 2
@@ -89,7 +89,7 @@ def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
             plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node, showPath2=showPath2)
 
     if not goal.parent:
-        raise ValueError('No Path Found')
+        raise NoPathFound
     
     path = []
     current = goal
@@ -126,36 +126,53 @@ def clearSubtree(node, grid, obs, openset, closedset):
                     openset.add(node)
 
 
-def phi_star(start, goal, grid_obs):
+def phi_star(start, goal, grid_obs, newBlockedCells=[]):
+    durations = []
+    lengths = []
+    paths = []
+
     x, y = np.mgrid[0:grid_obs.shape[0]+1, 0:grid_obs.shape[1]+1]
     grid = np.vectorize(Node)(x, y)
     start, goal = grid[start], grid[goal]
     goal.H, start.G, start.H = 0, 0, dist(start, goal)
 
+    newBlockedCells = iter(newBlockedCells)
     openset = set()
     closedset = set()
 
+    t1 = time.time()
+    duration = 0
+
     while True:
-        t1 = time.time()
         path = find_path(start, goal, grid, grid_obs, openset, closedset)
         
         if not DISPLAY:
             duration = abs(time.time() - t1)
-            print('Computation time:', duration)
-
-        print('Path length:', pathLength(path))
+        durations.append(duration)
+        lengths.append(pathLength(path))
+        paths.append(list(map(lambda n: n.pos, path)))
 
         if not REPLANNING:
             break
-
-        if DISPLAY and WAIT_INPUT:
+        
+        if DISPLAY_END:
             plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
-            blockedCells = plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
 
-            for pt in corners(blockedCells):
-                if (grid[pt] in openset or grid[pt] in closedset) and grid[pt] != start:
-                    clearSubtree(grid[pt], grid, grid_obs, openset, closedset)
-    return path, openset.union(closedset)
+        if DISPLAY_END and WAIT_INPUT:
+            blockedCells = plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
+        else:
+            try:
+                blockedCells = next(newBlockedCells)
+                updateGridBlockedCells(blockedCells, grid_obs)
+            except StopIteration:
+                break
+              
+        t1 = time.time()
+
+        for pt in corners(blockedCells):
+            if (grid[pt] in openset or grid[pt] in closedset) and grid[pt] != start:
+                clearSubtree(grid[pt], grid, grid_obs, openset, closedset)
+    return path, openset.union(closedset), np.array(durations), np.array(lengths), paths
 
 
 def main():
