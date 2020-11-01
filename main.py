@@ -66,5 +66,6 @@ def main():
         if i % 20 == 0:
             save(data)
 
+
 if __name__ == '__main__':
     main()

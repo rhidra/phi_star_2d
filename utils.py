@@ -32,7 +32,7 @@ class Node:
     def __repr__(self):
         return 'Node: ' + self.pos.__repr__()
 
-class NoPathFound(Exception):
+class NoPathFound(BaseException):
     pass
 
 def phi(a,b,c):
