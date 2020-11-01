@@ -32,6 +32,7 @@ class Node:
     def __repr__(self):
         return 'Node: ' + self.pos.__repr__()
 
+
 def phi(a,b,c):
     a, b, c = getPos(a), getPos(b), getPos(c)
     angle = (180./math.pi) * (-math.atan2(a[1]-b[1], a[0]-b[0]) + math.atan2(c[1]-b[1], c[0]-b[0]))

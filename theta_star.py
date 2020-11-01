@@ -48,9 +48,9 @@ def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
         openset.add(start)
 
     i = 0
-    while min(map(lambda o: o.G + 1.5 * o.H, openset)) < goal.G + 1.5 * goal.H and openset:
+    while openset and min(map(lambda o: o.G + H_COST_WEIGHT * o.H, openset)) < goal.G + H_COST_WEIGHT * goal.H:
         i = i + 1
-        current = min(openset, key=lambda o: o.G + 1.5 * o.H)
+        current = min(openset, key=lambda o: o.G + H_COST_WEIGHT * o.H)
 
         openset.remove(current)
         closedset.add(current)
@@ -69,7 +69,7 @@ def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
 
             updateVertex(current, node, grid, obs)
             
-        if i % 1 == 0 and DISPLAY:
+        if i % DISPLAY_FREQ == 0 and DISPLAY:
             plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node, showPath2=False)
 
     if not goal.parent:
@@ -103,14 +103,16 @@ def theta_star(start, goal, grid_obs):
         
         print('Path length:', pathLength(path))
 
-        if not DISPLAY_DONE:
+        if not REPLANNING:
             break
 
-        plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
-        plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
-        openset = set()
-        closedset = set()
-        goal.reset()
+        if DISPLAY and WAIT_INPUT:
+            plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
+            plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))
+            openset = set()
+            closedset = set()
+            goal.reset()
+    return path, openset.union(closedset)
 
 
 def main():

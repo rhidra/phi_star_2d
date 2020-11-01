@@ -4,15 +4,20 @@ from config import DISPLAY_DELAY
 
 fig, ax = plt.subplots()
 
-def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=None, showPath2=True, hold=False):
+def display(start=None, goal=None, grid=[], grid_obs=[], path=[], nodes=[], point=None, point2=None, showPath2=True, hold=False):
     ax.clear()
-    ax.set_xlim(-0.5, grid.shape[0])
-    ax.set_ylim(-0.5, grid.shape[1])
+    if len(grid) != 0:
+        ax.set_xlim(-0.5, grid.shape[0])
+        ax.set_ylim(-0.5, grid.shape[1])
+    elif len(grid_obs) != 0:
+        ax.set_xlim(-0.5, grid_obs.shape[0])
+        ax.set_ylim(-0.5, grid_obs.shape[0])
 
-    obs = []
-    x, y = np.mgrid[0:grid_obs.shape[0], 0:grid_obs.shape[1]]
-    np.vectorize(lambda node, x, y: obs.append(patches.Rectangle([x, y], 1, 1)) if node == Node.OBSTACLE else None)(grid_obs, x, y)
-    ax.add_collection(collections.PatchCollection(obs))
+    if len(grid_obs) != 0:
+        obs = []
+        x, y = np.mgrid[0:grid_obs.shape[0], 0:grid_obs.shape[1]]
+        np.vectorize(lambda node, x, y: obs.append(patches.Rectangle([x, y], 1, 1)) if node == Node.OBSTACLE else None)(grid_obs, x, y)
+        ax.add_collection(collections.PatchCollection(obs))
 
     lines = []
     for node in nodes:
@@ -34,10 +39,10 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
         lines.append(pt_list)
     ax.add_collection(collections.LineCollection(lines, colors='red', alpha=1 if len(path) == 0 else .5))
 
-    if start:
-        ax.add_patch(patches.Circle(start.pos, .3, linewidth=1, facecolor='green'))
-    if goal:
-        ax.add_patch(patches.Circle(goal.pos, .3, linewidth=1, facecolor='blue'))
+    if start is not None:
+        ax.add_patch(patches.Circle(start.pos if isinstance(start, Node) else start, .3, linewidth=1, facecolor='green'))
+    if goal is not None:
+        ax.add_patch(patches.Circle(goal.pos if isinstance(goal, Node) else goal, .3, linewidth=1, facecolor='blue'))
     if point:
         ax.add_patch(patches.Circle(point.pos, .3, linewidth=1, facecolor='red'))
     if point2:
@@ -60,7 +65,7 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
         ax.add_patch(patches.Wedge(point.parent.pos, 5, mid_angle + point.lb, mid_angle + point.ub, facecolor='cyan', alpha=.3))
 
         
-    if len(path) > 0:
+    if len(path) > 0 and isinstance(path[0], Node):
         local = []
         node = path[-1]
         while node.local:
@@ -79,11 +84,14 @@ def display(start, goal, grid, grid_obs, path=[], nodes=[], point=None, point2=N
             node = node.parent
         ax.add_collection(collections.PatchCollection([patches.Rectangle([p[0], p[1]], 1, 1, linewidth=1, facecolor='orange', alpha=.5) for p in pts], match_original=True))
 
+    elif len(path) > 0:
+        plt.plot(path[:, 0], path[:, 1], 'o-', color='red', linewidth=1)
+
     plt.title('Processing...')
-    if hold:
+    if hold and isinstance(hold, bool):
         plt.show()
     else:
-        plt.pause(DISPLAY_DELAY)
+        plt.pause(DISPLAY_DELAY if isinstance(hold, bool) else hold)
     
 
 def waitForInput(obs, plotCb):
