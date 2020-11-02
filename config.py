@@ -25,4 +25,4 @@ BLOCKED_CELLS = 20 # Number of newly blocked cell in one loop
 BLOCKED_CELLS_LOOP = 5 # Number of loops of replanning 
 
 # For the algorithm time duration, average on how many samples
-ALGO_DURATION_AVERAGE = 10
+ALGO_DURATION_AVERAGE = 12

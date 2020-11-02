@@ -85,10 +85,11 @@ def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
             
             showPath2 = updateVertex(current, node, grid, obs)
 
-        if i % DISPLAY_FREQ == 0 and DISPLAY:
+        if DISPLAY and i % DISPLAY_FREQ == 0:
             plot.display(start, goal, grid, obs, nodes=openset.union(closedset), point=current, point2=node, showPath2=showPath2)
 
     if not goal.parent:
+        print('  No path found !')
         raise NoPathFound
     
     path = []
@@ -127,6 +128,7 @@ def clearSubtree(node, grid, obs, openset, closedset):
 
 
 def phi_star(start, goal, grid_obs, newBlockedCells=[]):
+    print('  Computing Phi* algorithm...')
     durations = []
     lengths = []
     paths = []
@@ -143,7 +145,10 @@ def phi_star(start, goal, grid_obs, newBlockedCells=[]):
     t1 = time.time()
     duration = 0
 
+    i = 0
     while True:
+        print('  Planning #{}'.format(i))
+        i += 1
         path = find_path(start, goal, grid, grid_obs, openset, closedset)
         
         if not DISPLAY:
@@ -152,11 +157,12 @@ def phi_star(start, goal, grid_obs, newBlockedCells=[]):
         lengths.append(pathLength(path))
         paths.append(list(map(lambda n: n.pos, path)))
 
+        if DISPLAY_END:
+            plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
+
         if not REPLANNING:
             break
         
-        if DISPLAY_END:
-            plot.display(start, goal, grid, grid_obs, nodes=openset.union(closedset), path=path)
 
         if DISPLAY_END and WAIT_INPUT:
             blockedCells = plot.waitForInput(grid_obs, lambda: plot.display(start, goal, grid, grid_obs))

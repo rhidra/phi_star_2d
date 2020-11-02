@@ -5,6 +5,7 @@ Parser and utility functions for the Occ-Traj120 trajectories dataset (https://g
 """
 
 import os, re, numpy as np, plot
+from numpy.lib.stride_tricks import as_strided
 from utils import Node
 
 def mapPath(id):
@@ -28,8 +29,7 @@ def readMap(id):
                 if c != '1' and c != '0':
                    continue
                 grid[-1].append(Node.OBSTACLE if c == '1' else Node.FREE)
-    grid = np.array(grid)
-    return grid
+    return np.array(grid)
 
 def readTraj(id):
     trajs = []
@@ -55,17 +55,26 @@ def readTraj(id):
     return trajs
 
 
-def mapGenerator():
+# Upsample a binary array vertically and horizontally, by an integer factor
+def tile_array(a, b0, b1):
+    r, c = a.shape
+    rs, cs = a.strides
+    x = as_strided(a, (r, b0, c, b1), (rs, 0, cs, 0))
+    return x.reshape(r*b0, c*b1)
+
+
+def mapGenerator(upsampling=1, cycleThroughMaps=False):
     mapid = -1
     for id in getIdList():
         mapid += 1
         grid = readMap(id)
+        grid = tile_array(grid, upsampling, upsampling)
         trajs = readTraj(id)
         trajid = -1
-        for traj in trajs:
+        for traj in (trajs if not cycleThroughMaps else [trajs[0]]):
             trajid += 1
             x, y = traj['x'], traj['y']
-            start, goal = (int(x[0]), int(y[0])), (int(x[-1]), int(y[-1]))
+            start, goal = (int(x[0]*upsampling), int(y[0]*upsampling)), (int(x[-1]*upsampling), int(y[-1]*upsampling))
             # start, goal = ((x[0]), (y[0])), ((x[-1]), (y[-1]))
             grid[start], grid[goal] = Node.FREE, Node.FREE
             yield (mapid, trajid), start, goal, grid
