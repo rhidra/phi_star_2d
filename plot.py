@@ -5,6 +5,7 @@ from config import DISPLAY_DELAY
 fig, ax = plt.subplots()
 
 def display(start=None, goal=None, grid=[], grid_obs=[], path=[], nodes=[], point=None, point2=None, showPath2=True, hold=False):
+    print('  Plotting...')
     ax.clear()
     if len(grid) != 0:
         ax.set_xlim(-0.5, grid.shape[0])
@@ -14,9 +15,10 @@ def display(start=None, goal=None, grid=[], grid_obs=[], path=[], nodes=[], poin
         ax.set_ylim(-0.5, grid_obs.shape[0])
 
     if len(grid_obs) != 0:
-        obs = []
-        x, y = np.mgrid[0:grid_obs.shape[0], 0:grid_obs.shape[1]]
-        np.vectorize(lambda node, x, y: obs.append(patches.Rectangle([x, y], 1, 1)) if node == Node.OBSTACLE else None)(grid_obs, x, y)
+        # obs = []
+        # x, y = np.mgrid[0:grid_obs.shape[0], 0:grid_obs.shape[1]]
+        # np.vectorize(lambda node, x, y: obs.append(patches.Rectangle([x, y], 1, 1)) if node == Node.OBSTACLE else None)(grid_obs, x, y)
+        obs = [patches.Rectangle([x, y], w, h) for x, y, w, h in extractRect(grid_obs)]
         ax.add_collection(collections.PatchCollection(obs))
 
     lines = []
@@ -92,7 +94,35 @@ def display(start=None, goal=None, grid=[], grid_obs=[], path=[], nodes=[], poin
         plt.show()
     else:
         plt.pause(DISPLAY_DELAY if isinstance(hold, bool) else hold)
-    
+    print('End plot')
+
+
+def extractRect(grid):
+    rects = []
+    def alreadyDone(i, j):
+        for x, y, w, h in rects:
+            if x <= i < x+w and y <= j < y+h:
+                return True
+        return False
+
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+            if not alreadyDone(i, j) and grid[i, j] == Node.OBSTACLE:
+                for k in range(i+1, grid.shape[0]):
+                    if grid[k, j] == Node.FREE:
+                        break
+                    k += 1
+                imax = k
+                for k in range(j+1, grid.shape[1]):
+                    if grid[i:imax, j:k][grid[i:imax, j:k] == Node.FREE].size != 0:
+                        break
+                    k += 1
+                jmax = k
+                rects.append([i, j, imax-i, jmax-j])
+    return rects
+
+
+
 
 def waitForInput(obs, plotCb):
     refreshDisplay = False
