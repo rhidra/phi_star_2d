@@ -44,11 +44,12 @@ def updateVertex(current, node, grid, obs):
 
 # Return the path computed by the A* optimized algorithm from the start and goal points
 def find_path(start, goal, grid, obs, openset=set(), closedset=set()):
+    startTime = time.time()
     if len(openset) == 0:
         openset.add(start)
 
     i = 0
-    while openset and min(map(lambda o: o.G + H_COST_WEIGHT * o.H, openset)) < goal.G + H_COST_WEIGHT * goal.H:
+    while openset and min(map(lambda o: o.G + H_COST_WEIGHT * o.H, openset)) < goal.G + H_COST_WEIGHT * goal.H and time.time() - startTime < TIME_OUT:
         i = i + 1
         current = min(openset, key=lambda o: o.G + H_COST_WEIGHT * o.H)
 
