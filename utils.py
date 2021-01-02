@@ -43,6 +43,29 @@ def phi(a,b,c):
     return angle
 
 
+def phi3d_(a,b,c):
+    a, b, c = getPos(a), getPos(b), getPos(c)
+    p = (180./math.pi) * (-math.atan2(a[1]-b[1], a[0]-b[0]) + math.atan2(c[1]-b[1], c[0]-b[0]))
+    if p > 180:
+        p = - (180 - (p % 180)) # Set angle between [-180; 180]
+
+    t = (180./math.pi) * (-math.atan2(a[2]-b[2], math.sqrt((a[0]-b[0]) ** 2 + (a[1]-b[1]) ** 2)) + math.atan2(c[2]-b[2], math.sqrt((c[0]-b[0]) ** 2 + (c[1]-b[1]) ** 2)))
+    if t > 180:
+        t = - (180 - (t % 180)) # Set angle between [-180; 180]
+    return p, t
+
+
+def phi3d(ax,ay,az, bx,by,bz ,cx,cy,cz):
+    p = (180./math.pi) * (-math.atan2(ay-by, ax-bx) + math.atan2(cy-by, cx-bx))
+    if p > 180:
+        p = - (180 - (p % 180)) # Set angle between [-180; 180]
+
+    t = (180./math.pi) * (-math.atan2(az-bz, math.sqrt((ax-bx) ** 2 + (ay-by) ** 2)) + math.atan2(cz-bz, math.sqrt((cx-bx) ** 2 + (cy-by) ** 2)))
+    if t > 180:
+        t = - (180 - (t % 180)) # Set angle between [-180; 180]
+    return p, t
+
+
 # Return the list of corner coordinates for all block cells
 def corners(cells):
     pts = set()

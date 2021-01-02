@@ -1,4 +1,4 @@
-import plot, pickle, numpy as np
+import plot, pickle, numpy as np, sys
 from theta_star import theta_star
 from phi_star import phi_star
 from dataset import mapGenerator
@@ -80,9 +80,18 @@ def main():
                         durationsThetaMean=durationsThetaMean, durationsThetaStd=durationsThetaStd, lengthsTheta=lengthsTheta, pathsTheta=pathsTheta))
         # plot.display(start, goal, grid_obs=grid, nodes=nodes, path=path, hold=1)
 
-        if i % 1 == 0:
-            save(data)
+        save(data)
+
+
+def showMap(mapId):
+    for ids, start, goal, grid in mapGenerator(upsampling=40, cycleThroughMaps=True):
+        if ids[0] == mapId:
+          break
+    path, nodes, durationsPhi, lengthsPhi, pathsPhi = phi_star(start, goal, grid)
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) <= 1:
+        main()
+    else:
+        showMap(int(sys.argv[1]))

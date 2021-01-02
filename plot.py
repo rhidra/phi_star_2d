@@ -15,10 +15,10 @@ def display(start=None, goal=None, grid=[], grid_obs=[], path=[], nodes=[], poin
         ax.set_ylim(-0.5, grid_obs.shape[0])
 
     if len(grid_obs) != 0:
-        # obs = []
-        # x, y = np.mgrid[0:grid_obs.shape[0], 0:grid_obs.shape[1]]
-        # np.vectorize(lambda node, x, y: obs.append(patches.Rectangle([x, y], 1, 1)) if node == Node.OBSTACLE else None)(grid_obs, x, y)
-        obs = [patches.Rectangle([x, y], w, h) for x, y, w, h in extractRect(grid_obs)]
+        obs = []
+        x, y = np.mgrid[0:grid_obs.shape[0], 0:grid_obs.shape[1]]
+        np.vectorize(lambda node, x, y: obs.append(patches.Rectangle([x, y], 1, 1)) if node == Node.OBSTACLE else None)(grid_obs, x, y)
+        # obs = [patches.Rectangle([x, y], w, h) for x, y, w, h in extractRect(grid_obs)]
         ax.add_collection(collections.PatchCollection(obs))
 
     lines = []
